@@ -9,8 +9,62 @@ struct Elements {
     player: ContractAddress,
     #[key]
     id: u32,
-    element: Element,
+    // torii cannot indexed enum for now
+    // element: Element,
+
+    element: u32
 }
+
+// 00 - Water,
+// 01 - Fire,
+// 02 - Earth,
+// 03 - Air,
+// 04 - Pressure, // Air + Air
+// 05 - Energy, // Air + Fire
+// 06 - Dust, // Earth + Air
+// 07 - Lava, // Earth + Fire
+// 08 - Rain, // Water + Air
+// 09 - Mud, // Water + Earth
+// 10 - Steam, // Water + Fire
+// 11 - Sea, // Water + Water
+// 12 - Wind, // Air + Energy
+// 13 - Stone, // Air + Lava
+// 14 - Atmosphere, // Air + Pressure
+// 15 - Cloud, // Air + Steam
+// 16 - Earthquake, // Earth + Energy
+// 17 - Gunpowder, // Fire + Dust
+// 18 - Salt, // Fire + Sea
+// 19 - Volcano, // Lava + Earth
+// 20 - Granite, // Lava + Pressure
+// 21 - Obsidian, // Lava + Water
+// 22 - Brick, // Mud + Fire
+// 23 - Plant, // Rain + Earth
+// 24 - Flood, // Rain + Rain
+// 25 - Ocean, // Sea + Sea
+// 26 - Geyser, // Steam + Earth
+// 27 - Sky, // Air + Cloud
+// 28 - Sand, // Air + Stone
+// 29 - Wall, // Brick + Brick
+// 30 - Fog, // Earth + Cloud
+// 31 - Mountain, // Earthquake + Earth
+// 32 - Storm, // Energy + Cloud
+// 33 - Metal, // Fire + Stone
+// 34 - Explosion, // Gunpowder + Fire
+// 35 - Swamp, // Mud + Plant
+// 36 - Tsunami, // Ocean + Earthquake
+// 37 - Algae, // Ocean + Plant
+// 38 - Isle, // Ocean + Volcano
+// 39 - Wave, // Ocean + Wind
+// 40 - Cotton, // Plant + Cloud
+// 41 - Grass, // Plant + Earth
+// 42 - Tobacco, // Plant + Fire
+// 43 - Seaweed, // Plant + Ocean
+// 44 - Garden, // Plant + Plant
+// 45 - Moss, // Plant + Stone
+// 46 - Coal, // Pressure + Plant
+// 47 - Ash, // Volcano + Energy
+// 48 - Eruption, // Volcano + Energy
+// 49 - Hurricane, // Wind + Energy
 
 #[derive(Copy, PartialEq, PartialOrd, Drop, Serde)]
 enum Element {
