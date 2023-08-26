@@ -1,84 +1,71 @@
-#[system]
-mod spawn {
-    use array::ArrayTrait;
-    use box::BoxTrait;
-    use traits::Into;
-    use dojo::world::Context;
+use dojo::world::Context;
+use option::{Option, OptionTrait};
+use alchemy::components::{Element, Elements};
 
-    use dojo_examples::components::Position;
-    use dojo_examples::components::Moves;
+#[system]
+mod init_user {
+    use dojo::world::Context;
+    use alchemy::components::{Element, Elements};
 
     fn execute(ctx: Context) {
-        let position = get!(ctx.world, ctx.origin, (Position));
-        set!(
-            ctx.world,
-            (
-                Moves {
-                    player: ctx.origin, remaining: 10
-                    }, Position {
-                    player: ctx.origin, x: position.x + 10, y: position.y + 10
-                },
-            )
-        );
+        let user = ctx.origin;
+        let id = ctx.world.uuid();
+        set!(ctx.world, Elements { player: user, id: id, element: Element::Water });
+        let id = ctx.world.uuid();
+        set!(ctx.world, Elements { player: user, id: id, element: Element::Fire });
+        let id = ctx.world.uuid();
+        set!(ctx.world, Elements { player: user, id: id, element: Element::Earth });
+        let id = ctx.world.uuid();
+        set!(ctx.world, Elements { player: user, id: id, element: Element::Air });
         return ();
     }
 }
 
 #[system]
-mod move {
-    use array::ArrayTrait;
-    use box::BoxTrait;
-    use traits::Into;
+mod merge_elements {
     use dojo::world::Context;
-    use debug::PrintTrait;
+    use alchemy::components::{Element, Elements};
 
-    use dojo_examples::components::Position;
-    use dojo_examples::components::Moves;
+    fn execute(ctx: Context, elem_id_1: u32, elem_id_2: u32) {
+        let elem1 = get!(ctx.world, (ctx.origin, elem_id_1), (Elements));
+        let elem2 = get!(ctx.world, (ctx.origin, elem_id_2), (Elements));
 
-    #[derive(Serde, Drop)]
-    enum Direction {
-        Left: (),
-        Right: (),
-        Up: (),
-        Down: (),
-    }
-
-    impl DirectionIntoFelt252 of Into<Direction, felt252> {
-        fn into(self: Direction) -> felt252 {
-            match self {
-                Direction::Left(()) => 0,
-                Direction::Right(()) => 1,
-                Direction::Up(()) => 2,
-                Direction::Down(()) => 3,
-            }
+        let elem3 = merge_elements(elem1.element, elem2.element);
+        match elem3 {
+            Option::Some(new_elem) => {
+                let id = ctx.world.uuid();
+                set!(ctx.world, Elements { player: ctx.origin, id: id, element: new_elem });
+            },
+            Option::None(_) => (),
         }
-    }
 
-    fn execute(ctx: Context, direction: Direction) {
-        let (mut position, mut moves) = get!(ctx.world, ctx.origin, (Position, Moves));
-        moves.remaining -= 1;
-        let next = next_position(position, direction);
-        set!(ctx.world, (moves, next));
         return ();
     }
 
-    fn next_position(mut position: Position, direction: Direction) -> Position {
-        match direction {
-            Direction::Left(()) => {
-                position.x -= 1;
-            },
-            Direction::Right(()) => {
-                position.x += 1;
-            },
-            Direction::Up(()) => {
-                position.y -= 1;
-            },
-            Direction::Down(()) => {
-                position.y += 1;
-            },
-        };
-
-        position
+    fn merge_elements(elem1: Element, elem2: Element) -> Option<Element> {
+        let mut e1 = elem1;
+        let mut e2 = elem2;
+        //if elem1. > elem2 {
+        //    e1 = elem2;
+        //    e2 = elem1;
+        //}
+        if e1 == Element::Water {
+            if e2 == Element::Air { // Rain = Water + Air
+                Option::Some(Element::Rain)
+            } else if e2 == Element::Earth { // Mud = Water + Earth
+                Option::Some(Element::Mud)
+            } else if e2 == Element::Fire { // Steam = Water + Fire
+                Option::Some(Element::Steam)
+            } else if e2 == Element::Water { // Sea = Water + Water
+                Option::Some(Element::Sea)
+            } else if e2 == Element::Lava { // Obsidian = Lava + Water
+                Option::Some(Element::Obsidian)
+            } else {
+                Option::None
+            }
+        } else {
+            Option::None
+        }
     }
 }
 
