@@ -11,7 +11,7 @@ use alchemy::tests::utils::spawn_world;
 fn test_init_user() {
     let world = spawn_world();
 
-    world.execute('init_user', array![]);
+    world.execute('init_user_system', array![]);
 
     // call data for entity - it is just the caller
     let caller = starknet::contract_address_const::<0x0>();

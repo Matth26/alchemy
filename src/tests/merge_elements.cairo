@@ -11,12 +11,12 @@ use alchemy::tests::utils::spawn_world;
 fn test_init_user() {
     let world = spawn_world();
 
-    world.execute('init_user', array![]);
+    world.execute('init_user_system', array![]);
 
     let caller = starknet::contract_address_const::<0x0>();
 
     let call_data = array![0, 0]; // Water + Water = Sea ()
-    world.execute('merge_elements', call_data);
+    world.execute('merge_elements_system', call_data);
 
     // call data for entity - it is just the caller
     let caller = starknet::contract_address_const::<0x0>();
