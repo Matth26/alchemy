@@ -9,7 +9,7 @@ Firstly, clone the [dojo-starter](https://github.com/dojoengine/dojo-starter) pr
 Subsequently, clone this project and execute the following commands in the terminal:
 
 ```console
-yarn
+yarn install
 
 yarn generate
 

@@ -1,19 +1,19 @@
 // quick hack generated from manifest
 // todo: move to core
 
-const fs = require("fs");
-const path = require("path");
+const fs = require('fs');
+const path = require('path');
 
 // Path to the input JSON file
-const jsonFilePath = path.resolve(__dirname, "manifest.json");
+const jsonFilePath = path.resolve(__dirname, 'manifest.json');
 
 // Path to the output JS file
-const jsFilePath = path.resolve(__dirname, "output.ts");
+const jsFilePath = path.resolve(__dirname, 'output.ts');
 
 // Read the JSON file
-fs.readFile(jsonFilePath, "utf8", (err, jsonString) => {
+fs.readFile(jsonFilePath, 'utf8', (err, jsonString) => {
   if (err) {
-    console.log("Error reading file:", err);
+    console.log('Error reading file:', err);
     return;
   }
 
@@ -36,23 +36,23 @@ fs.readFile(jsonFilePath, "utf8", (err, jsonString) => {
       // Generate a line for each member of the component
       component.members.forEach((member) => {
         // Convert member types to a JS equivalent
-        let memberType = "RecsType.Unknown";
+        let memberType = 'RecsType.Unknown';
         if (
-          member.type === "u8" ||
-          member.type === "u16" ||
-          member.type === "u32" ||
-          member.type === "usize" ||
-          member.type === "u64" ||
-          member.type === "u128" ||
-          member.type === "u250" ||
-          member.type === "felt252" ||
-          member.type === "ContractAddress"
+          member.type === 'u8' ||
+          member.type === 'u16' ||
+          member.type === 'u32' ||
+          member.type === 'usize' ||
+          member.type === 'u64' ||
+          member.type === 'u128' ||
+          member.type === 'u250' ||
+          member.type === 'felt252' ||
+          member.type === 'ContractAddress'
         ) {
-          memberType = "RecsType.Number";
-        } else if (member.type === "bool") {
-          memberType = "RecsType.Boolean";
-        } else if (member.type === "u256") {
-          memberType = "RecsType.NumberArray";
+          memberType = 'RecsType.Number';
+        } else if (member.type === 'bool') {
+          memberType = 'RecsType.Boolean';
+        } else if (member.type === 'u256') {
+          memberType = 'RecsType.NumberArray';
         }
         fileContent += `          ${member.name}: ${memberType},\n`;
       });
@@ -68,12 +68,12 @@ fs.readFile(jsonFilePath, "utf8", (err, jsonString) => {
     // Write the generated JS file content
     fs.writeFile(jsFilePath, fileContent, (err) => {
       if (err) {
-        console.log("Error writing file:", err);
+        console.log('Error writing file:', err);
       } else {
-        console.log("File generated successfully");
+        console.log('File generated successfully');
       }
     });
   } catch (err) {
-    console.log("Error parsing JSON string:", err);
+    console.log('Error parsing JSON string:', err);
   }
 });

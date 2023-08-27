@@ -5,6 +5,7 @@ mod init_user_system {
 
     fn execute(ctx: Context) {
         let user = ctx.origin;
+
         let id = ctx.world.uuid();
         // set!(ctx.world, Elements { player: user, id: id, element: Element::Water });
         // let id = ctx.world.uuid();

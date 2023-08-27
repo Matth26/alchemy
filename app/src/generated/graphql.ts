@@ -19,11 +19,51 @@ export type Scalars = {
   Cursor: { input: any; output: any; }
   DateTime: { input: any; output: any; }
   felt252: { input: any; output: any; }
-  u8: { input: any; output: any; }
   u32: { input: any; output: any; }
 };
 
-export type ComponentUnion = Moves | Position;
+export type ComponentUnion = Elements;
+
+export enum Direction {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
+
+export type Elements = {
+  __typename?: 'Elements';
+  element?: Maybe<Scalars['u32']['output']>;
+  entity?: Maybe<Entity>;
+};
+
+export type ElementsConnection = {
+  __typename?: 'ElementsConnection';
+  edges?: Maybe<Array<Maybe<ElementsEdge>>>;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type ElementsEdge = {
+  __typename?: 'ElementsEdge';
+  cursor: Scalars['Cursor']['output'];
+  node?: Maybe<Elements>;
+};
+
+export type ElementsOrder = {
+  direction: Direction;
+  field: ElementsOrderOrderField;
+};
+
+export enum ElementsOrderOrderField {
+  Element = 'ELEMENT'
+}
+
+export type ElementsWhereInput = {
+  element?: InputMaybe<Scalars['Int']['input']>;
+  elementGT?: InputMaybe<Scalars['Int']['input']>;
+  elementGTE?: InputMaybe<Scalars['Int']['input']>;
+  elementLT?: InputMaybe<Scalars['Int']['input']>;
+  elementLTE?: InputMaybe<Scalars['Int']['input']>;
+  elementNEQ?: InputMaybe<Scalars['Int']['input']>;
+};
 
 export type Entity = {
   __typename?: 'Entity';
@@ -31,7 +71,7 @@ export type Entity = {
   components?: Maybe<Array<Maybe<ComponentUnion>>>;
   createdAt?: Maybe<Scalars['DateTime']['output']>;
   id?: Maybe<Scalars['ID']['output']>;
-  keys?: Maybe<Scalars['String']['output']>;
+  keys?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -69,51 +109,13 @@ export type EventEdge = {
   node?: Maybe<Event>;
 };
 
-export type Moves = {
-  __typename?: 'Moves';
-  entity?: Maybe<Entity>;
-  remaining?: Maybe<Scalars['u8']['output']>;
-};
-
-export type MovesConnection = {
-  __typename?: 'MovesConnection';
-  edges?: Maybe<Array<Maybe<MovesEdge>>>;
-  totalCount: Scalars['Int']['output'];
-};
-
-export type MovesEdge = {
-  __typename?: 'MovesEdge';
-  cursor: Scalars['Cursor']['output'];
-  node?: Maybe<Moves>;
-};
-
-export type Position = {
-  __typename?: 'Position';
-  entity?: Maybe<Entity>;
-  x?: Maybe<Scalars['u32']['output']>;
-  y?: Maybe<Scalars['u32']['output']>;
-};
-
-export type PositionConnection = {
-  __typename?: 'PositionConnection';
-  edges?: Maybe<Array<Maybe<PositionEdge>>>;
-  totalCount: Scalars['Int']['output'];
-};
-
-export type PositionEdge = {
-  __typename?: 'PositionEdge';
-  cursor: Scalars['Cursor']['output'];
-  node?: Maybe<Position>;
-};
-
 export type Query = {
   __typename?: 'Query';
+  elementsComponents?: Maybe<ElementsConnection>;
   entities?: Maybe<EntityConnection>;
   entity: Entity;
   event: Event;
   events?: Maybe<EventConnection>;
-  movesComponents?: Maybe<MovesConnection>;
-  positionComponents?: Maybe<PositionConnection>;
   system: System;
   systemCall: SystemCall;
   systemCalls?: Maybe<SystemCallConnection>;
@@ -121,11 +123,21 @@ export type Query = {
 };
 
 
+export type QueryElementsComponentsArgs = {
+  after?: InputMaybe<Scalars['Cursor']['input']>;
+  before?: InputMaybe<Scalars['Cursor']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<ElementsOrder>;
+  where?: InputMaybe<ElementsWhereInput>;
+};
+
+
 export type QueryEntitiesArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
-  keys: Array<Scalars['String']['input']>;
+  keys?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   last?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -137,22 +149,6 @@ export type QueryEntityArgs = {
 
 export type QueryEventArgs = {
   id: Scalars['ID']['input'];
-};
-
-
-export type QueryMovesComponentsArgs = {
-  after?: InputMaybe<Scalars['Cursor']['input']>;
-  before?: InputMaybe<Scalars['Cursor']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type QueryPositionComponentsArgs = {
-  after?: InputMaybe<Scalars['Cursor']['input']>;
-  before?: InputMaybe<Scalars['Cursor']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -212,7 +208,7 @@ export type SystemEdge = {
 export type GetEntitiesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetEntitiesQuery = { __typename?: 'Query', entities?: { __typename?: 'EntityConnection', edges?: Array<{ __typename?: 'EntityEdge', node?: { __typename?: 'Entity', keys?: string | null, components?: Array<{ __typename: 'Moves', remaining?: any | null } | { __typename: 'Position', x?: any | null, y?: any | null } | null> | null } | null } | null> | null } | null };
+export type GetEntitiesQuery = { __typename?: 'Query', entities?: { __typename?: 'EntityConnection', edges?: Array<{ __typename?: 'EntityEdge', node?: { __typename?: 'Entity', keys?: Array<string | null> | null, components?: Array<{ __typename: 'Elements', element?: any | null } | null> | null } | null } | null> | null } | null };
 
 
 export const GetEntitiesDocument = gql`
@@ -223,12 +219,8 @@ export const GetEntitiesDocument = gql`
         keys
         components {
           __typename
-          ... on Moves {
-            remaining
-          }
-          ... on Position {
-            x
-            y
+          ... on Elements {
+            element
           }
         }
       }
