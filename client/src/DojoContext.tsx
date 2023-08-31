@@ -16,27 +16,29 @@ export const DojoProvider = ({ children, value }: Props) => {
   return <DojoContext.Provider value={value}>{children}</DojoContext.Provider>;
 };
 
+console.log(import.meta.env.VITE_LOCAL_NODE_URL);
+const provider = new RpcProvider({
+  nodeUrl: import.meta.env.VITE_LOCAL_NODE_URL,
+});
+console.log(provider);
+
 export const useDojo = () => {
   const value = useContext(DojoContext);
 
-  const provider = new RpcProvider({
-    nodeUrl: 'http://localhost:5050',
-  });
-
+  //
   // this can be substituted with a wallet provider
-  const masterAccount = new Account(
-    provider,
-    import.meta.env.VITE_PUBLIC_MASTER_ADDRESS!,
-    import.meta.env.VITE_PUBLIC_MASTER_PRIVATE_KEY!
-  );
+  //
+  const master_address = import.meta.env.VITE_PUBLIC_MASTER_ADDRESS!;
+  const private_key = import.meta.env.VITE_PUBLIC_MASTER_PRIVATE_KEY!;
+  const masterAccount = new Account(provider, master_address, private_key);
 
   const { create, list, get, account, select, isDeploying } = useBurner({
     masterAccount: masterAccount,
     accountClassHash: import.meta.env.VITE_PUBLIC_ACCOUNT_CLASS_HASH!,
-    provider: provider,
   });
 
   if (!value) throw new Error('Must be used within a DojoProvider');
+
   return {
     setup: value,
     account: {

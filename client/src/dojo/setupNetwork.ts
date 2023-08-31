@@ -5,22 +5,17 @@ import { getSdk } from '../generated/graphql';
 import { defineContractComponents } from './contractComponents';
 import { world } from './world';
 
-export const WORLD_ADDRESS =
-  '0xb777447dde4b9d7723263055ef0ea85877f7a64ad620a993cfd39b44c30fa7';
-
 export type SetupNetworkResult = Awaited<ReturnType<typeof setupNetwork>>;
 
 export async function setupNetwork() {
-  const client = new GraphQLClient('http://localhost:8080');
-
-  const graphSdk = getSdk(client);
-
-  const contractComponents = defineContractComponents(world);
-
-  const provider = new RPCProvider(WORLD_ADDRESS);
+  console.log(import.meta.env.VITE_PUBLIC_WORLD_ADDRESS);
+  const provider = new RPCProvider(
+    import.meta.env.VITE_PUBLIC_WORLD_ADDRESS!,
+    import.meta.env.VITE_LOCAL_NODE_URL
+  );
 
   return {
-    contractComponents,
+    contractComponents: defineContractComponents(world),
     provider,
     execute: async (
       signer: Account,
@@ -32,6 +27,6 @@ export async function setupNetwork() {
     entities: async (component: string, partition: number) =>
       provider.entities(component, partition),
     world,
-    graphSdk,
+    graphSdk: getSdk(new GraphQLClient(import.meta.env.VITE_LOCAL_TORII)),
   };
 }

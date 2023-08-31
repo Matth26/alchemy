@@ -5,8 +5,7 @@ import {
   setComponent,
 } from '@latticexyz/recs';
 import { uuid } from '@latticexyz/utils';
-import { poseidonHashMany } from 'micro-starknet';
-import { Direction } from 'readline';
+//import { poseidonHashMany } from 'micro-starknet';
 import {
   Account,
   Event,
@@ -22,8 +21,10 @@ export function createSystemCalls(
   { execute, contractComponents }: SetupNetworkResult,
   { Elements }: ClientComponents
 ) {
-  const init_user = async (signer: Account) => {
-    console.log('signer', signer);
+  const init_user = async (
+    signer: Account,
+    add_element: (id: number) => void
+  ) => {
     const firstElemId = uuid();
     const entityId0 = getEntityIdFromKeys([BigInt(signer.address), BigInt(0)]);
     Elements.addOverride(firstElemId, {
@@ -53,16 +54,16 @@ export function createSystemCalls(
     });
 
     try {
-      const tx = await execute(signer, 'init_user', []);
+      const tx = await execute(signer, 'init_user_system', []);
+      console.log('tx', tx);
 
-      console.log(tx);
-      const receipt = await signer.waitForTransaction(tx.transaction_hash, {
-        retryInterval: 100,
-      });
+      const receipt = await signer.waitForTransaction(tx.transaction_hash);
 
       //const events = parseEvent(receipt);
+
       console.log('receipt', receipt);
       console.log('getEvents(receipt)', getEvents(receipt));
+      getEvents(receipt).map((e) => add_element(e.data[3]));
       setComponentsFromEvents(contractComponents, getEvents(receipt));
     } catch (e) {
       console.log(e);
@@ -78,7 +79,12 @@ export function createSystemCalls(
     }
   };
 
-  const merge_elements = async (signer: Account, direction: Direction) => {
+  const merge_elements = async (
+    signer: Account,
+    elem1: number,
+    elem2: number,
+    add_element: (id: number) => void
+  ) => {
     /*const entityId = parseInt(signer.address) as EntityIndex;
 
     setComponentsFromEvents(contractComponents, getEvents(receipt));
@@ -98,39 +104,27 @@ export function createSystemCalls(
       value: {
         remaining: (getComponentValue(Moves, entityId)?.remaining || 0) - 1,
       },
-    });
+    });*/
 
     try {
-      const tx = await execute(signer, 'move', [direction]);
+      const tx = await execute(signer, 'merge_elements_system', [elem1, elem2]);
 
       console.log(tx);
       const receipt = await signer.waitForTransaction(tx.transaction_hash, {
         retryInterval: 100,
       });
 
-      console.log(receipt);
-
-      const events = parseEvent(receipt);
-      const entity = parseInt(events[0].entity.toString()) as EntityIndex;
-
-      const movesEvent = events[0] as Moves;
-      setComponent(contractComponents.Moves, entity, {
-        remaining: movesEvent.remaining,
-      });
-
-      const positionEvent = events[1] as Position;
-      setComponent(contractComponents.Position, entity, {
-        x: positionEvent.x,
-        y: positionEvent.y,
-      });
+      // const events = parseEvent(receipt);
+      // console.log('events', events);
+      // console.log('receipt', receipt);
+      // console.log('getEvents(receipt)', getEvents(receipt));
+      getEvents(receipt).map((e) => add_element(e.data[3]));
+      setComponentsFromEvents(contractComponents, getEvents(receipt));
     } catch (e) {
       console.log(e);
-      Position.removeOverride(positionId);
-      Moves.removeOverride(movesId);
     } finally {
-      Position.removeOverride(positionId);
-      Moves.removeOverride(movesId);
-    }*/
+      console.log('e');
+    }
   };
 
   return {
@@ -164,16 +158,18 @@ export const parseEvent = (
   for (const raw of receipt.events) {
     const decodedEventType = shortString.decodeShortString(raw.data[0]);
 
+    console.log('decodedEventType', raw);
     switch (decodedEventType) {
       case ComponentEvents.Elements:
+        console.log('raw', raw.data);
         if (raw.data.length < 6) {
-          throw new Error('Insufficient data for Moves event.');
+          throw new Error('Insufficient data for Elements event.');
         }
 
         events.push({
           type: ComponentEvents.Elements,
           entity: raw.data[2],
-          element: Number(raw.data[5]),
+          element: Number(raw.data[6]),
         });
         break;
 
@@ -216,6 +212,7 @@ export function setComponentFromEvent(
   let index = 2 + keysNumber + 1;
 
   const keys = eventData.slice(2, 2 + keysNumber).map((key) => BigInt(key));
+  console.log('keys', keys);
 
   // get entityIndex from keys
   const entityIndex = getEntityIdFromKeys(keys);
@@ -247,7 +244,7 @@ export function getEntityIdFromKeys(keys: bigint[]): EntityIndex {
     return parseInt(keys[0].toString()) as EntityIndex;
   }
   // calculate the poseidon hash of the keys
-  const poseidon = poseidonHashMany([BigInt(keys.length), ...keys]);
+  const poseidon = 'a'; //poseidonHashMany([BigInt(keys.length), ...keys]);
   return parseInt(poseidon.toString()) as EntityIndex;
 }
 
